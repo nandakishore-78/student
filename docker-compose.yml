@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  studentapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://studentdb:3306/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_APPLICATION_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_APPLICATION_PASSWORD}
+    ports:
+      - "8090:8090"
+    depends_on:
+      studentdb:
+        condition: service_healthy
+    networks:
+      - finance_default
+
+  studentdb:
+    image: mariadb:10.6
+    restart: always
+    volumes:
+      - ./migrations/mysql-migrations.sql:/docker-entrypoint-initdb.d/mysql-migrations.sql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    networks:
+      - finance_default
+    healthcheck:
+      test: >
+        /usr/bin/mysql 
+        --user=root 
+        --password=$$MYSQL_ROOT_PASSWORD 
+        --execute "SHOW DATABASES;"
+      timeout: 2s
+      retries: 10
+
+networks:
+  finance_default:
+    external: true

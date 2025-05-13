@@ -1,0 +1,13 @@
+finance:
+  host: http://financeapp:8081
+  student:
+    create: /accounts
+  course:
+    enrol: /invoices
+  account:
+    status: /accounts/student/
+
+library:
+  host: http://libraryapp:80
+  student:
+    create: /api/register
